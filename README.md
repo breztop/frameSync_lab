@@ -1,6 +1,6 @@
 # Frame Sync Lab
 
-当前版本：**v0.1.1**。
+当前版本：**v0.12**。
 
 用于 BreFlow source → sink 同源画面可见延迟测试的离线 Godot 4.7 轻量 2D 项目。支持 Windows、Linux、macOS 的 x64 / ARM64 导出。默认 1152×648 客户区、Compatibility 渲染器、目标 60 FPS、VSync 开启、轻负载背景。继承原项目版本，不需要网络服务。
 
@@ -94,13 +94,13 @@ python tools/check_export.py "C:\实际记录目录\某轮导出目录"
 确认要发布的代码已经提交并推送后，例如：
 
 ```powershell
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.12
+git push origin v0.12
 ```
 
 这两个命令会为当前提交创建版本并触发公开发布；本文只提供操作示例，没有替你执行。标签需要指向包含工作流及所有项目文件的提交。请勿反复移动或覆盖已发布的标签，更新版本时使用新标签。
 
-构建成功后自动在 [GitHub Releases](https://github.com/breztop/frameSync_lab/releases) 创建下载页，上传平台包及 `SHA256SUMS.txt`。带连字符的标签（如 `v0.1.1-rc.1`）标记为预发布。仓库公开时，大家无需通过 Actions 页面便可下载 Release 附件。
+构建成功后自动在 [GitHub Releases](https://github.com/breztop/frameSync_lab/releases) 创建下载页，上传平台包及 `SHA256SUMS.txt`。带连字符的标签（如 `v0.12-rc.1`）标记为预发布。仓库公开时，大家无需通过 Actions 页面便可下载 Release 附件。
 
 | 平台 | 下载包 | 构建方式 |
 | --- | --- | --- |
@@ -118,7 +118,7 @@ Windows/Linux 四个包必须成功，macOS 两个包可选。导出只包含主
 
 Windows 使用 7z / LZMA2、`-mx=9`、64 MiB 字典及固实压缩；可用 7-Zip 解压。Linux/macOS 使用 `tar.xz` 与 `xz -9e`，保留执行权限和应用目录结构，解压命令为 `tar -xJf 文件名.tar.xz`。macOS 先展开引擎生成的 ZIP 再压缩为 tar.xz，不把两个压缩包叠在一起。Actions 上传禁用重复压缩。
 
-每份包包含完整项目 `source/`、`LICENSE`、`THIRD_PARTY_NOTICES.txt`、`README.md` 和 `BUILD.txt`。不要从分发包中移除对应源码与许可。正式下载使用 Release 附件，不再传递中间构建产物。实际大小会写入工作流 Summary；尚未获得实测包体积，不能承诺压缩比例。
+每份平台包只包含导出的程序（macOS 为 `.app`）和 `BUILD.txt`，不额外打包源码、README 或许可副本。源码独立保留在 GitHub，可使用 Release 页面自带的源码下载；`BUILD.txt` 记录构建提交和对应源码地址。正式下载使用 Release 附件，不再传递中间构建产物。实际大小会写入工作流 Summary；尚未获得实测包体积，不能承诺压缩比例。
 
 
 
@@ -126,7 +126,9 @@ Windows 使用 7z / LZMA2、`-mx=9`、64 MiB 字典及固实压缩；可用 7-Zi
 
 本项目原创代码与资产采用 **GPL-3.0-only**，完整英文原文见 `LICENSE`。允许使用、修改及商业分发；当你向他人分发本程序或修改版时，应遵守 GPL，保留许可并提供对应源码。单纯运行工具、内部修改但不分发，或使用工具生成自己的测试记录，不要求公开其他独立项目。中文介绍不替代协议正文。
 
-Godot Engine 和其所含第三方组件各自的许可保留在 `THIRD_PARTY_NOTICES.txt`，不被重新许可为 GPL。程序 About 页面显示当前版本号、一句简介及 GitHub、开源协议、第三方许可链接，点击后使用系统浏览器打开（访问链接需要联网）。完整许可文件仍随源码和发布包提供。系统字体由运行机器提供，不随发布包分发。
+Godot Engine 和其所含第三方组件各自的许可保留在 `THIRD_PARTY_NOTICES.txt`，不被重新许可为 GPL。程序 About 页面显示当前版本号、一句简介及 GitHub、开源协议、第三方许可链接，点击后使用系统浏览器打开（访问链接需要联网）。完整许可文件保留在源码仓库并嵌入程序资源，不在平台包中额外复制。系统字体由运行机器提供，不随发布包分发。
 
 - [GNU GPL v3 正文](https://www.gnu.org/licenses/gpl-3.0.html)
 - [Godot 4.7 官方下载](https://godotengine.org/download/archive/4.7-stable/)
+
+每次发布成功后，按发布时间仅保留最近两个非草稿 Release（含预发布）及下载附件；更早的 Release 自动删除，Git 标签与提交历史保留。

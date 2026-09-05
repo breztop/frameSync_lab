@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bpjbos8xxkdcv" path="res://scenes/lab.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/background.tscn" id="2"]
 [ext_resource type="Theme" path="res://scenes/interface_theme.tres" id="3"]
+[ext_resource type="Texture2D" path="res://asset/logo.png" id="4_logo"]
 
 [sub_resource type="StyleBoxFlat" id="Panel"]
 bg_color = Color(0.018, 0.03, 0.05, 1)
@@ -288,6 +289,15 @@ text = "返回测试  Esc"
 layout_mode = 2
 theme_override_constants/separation = 16
 
+[node name="Logo" type="TextureRect" parent="Interface/AboutPanel/Panel/Margin/Content/Identity"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_logo")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Name" type="Label" parent="Interface/AboutPanel/Panel/Margin/Content/Identity"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -304,7 +314,7 @@ custom_minimum_size = Vector2(78, 34)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.94, 0.88, 1)
 theme_override_font_sizes/font_size = 18
-text = "v0.1.1"
+text = "v0.12"
 horizontal_alignment = 1
 vertical_alignment = 1
 

@@ -11,10 +11,11 @@ config_version=5
 [application]
 
 config/name="frameSync_lab"
-config/version="0.1.1"
+config/version="0.12"
 run/main_scene="res://scenes/lab.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://asset/logo.png"
+config/windows_native_icon="res://asset/logo.ico"
 
 [display]
 

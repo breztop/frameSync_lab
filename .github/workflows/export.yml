@@ -98,3 +98,16 @@ jobs:
           flags=()
           if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
           gh release create "$TAG" dist/* --repo "$GH_REPO" --verify-tag --title "$TAG" --generate-notes "${flags[@]}"
+      - name: Keep the two most recently published releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api --paginate --slurp "repos/$GH_REPO/releases?per_page=100" > "$RUNNER_TEMP/releases.json"
+          jq -r 'add | map(select(.draft == false)) | sort_by(.published_at, .id) | reverse | .[2:][] | .tag_name' "$RUNNER_TEMP/releases.json" > "$RUNNER_TEMP/old-releases.txt"
+          while IFS= read -r old_tag; do
+            gh release delete "$old_tag" --repo "$GH_REPO" --yes
+            echo "Removed old release and assets: $old_tag (Git tag retained)" >> "$GITHUB_STEP_SUMMARY"
+          done < "$RUNNER_TEMP/old-releases.txt"

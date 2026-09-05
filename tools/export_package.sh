@@ -14,24 +14,25 @@ fi
 mkdir -p "build/payloads/$TARGET"
 godot --headless --path . --export-release "$PRESET" "build/payloads/$TARGET/$BINARY"
 test -s "build/payloads/$TARGET/$BINARY"
-cp LICENSE THIRD_PARTY_NOTICES.txt README.md build/payloads/$TARGET/
-mkdir -p build/payloads/$TARGET/source
-git archive HEAD | tar -x -C build/payloads/$TARGET/source
-printf 'Source commit: %s\nGodot: %s-stable\n' "$GITHUB_SHA" "$GODOT_VERSION" > build/payloads/$TARGET/BUILD.txt
+printf 'Source commit: %s\nSource URL: https://github.com/%s/tree/%s\nGodot: %s-stable\n' "$GITHUB_SHA" "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GODOT_VERSION" > "build/payloads/$TARGET/BUILD.txt"
+items=("$BINARY" "BUILD.txt")
 mkdir -p dist
 if [[ "$TARGET" == windows-* ]]; then
-  (cd build/payloads/$TARGET && "$SEVEN_ZIP" a -t7z -m0=lzma2 -mx=9 -md=64m -ms=on "$ROOT/dist/FrameSyncLab-${TARGET}.7z" .)
+  (cd build/payloads/$TARGET && "$SEVEN_ZIP" a -t7z -m0=lzma2 -mx=9 -md=64m -ms=on "$ROOT/dist/FrameSyncLab-${TARGET}.7z" "${items[@]}")
   "$SEVEN_ZIP" t "dist/FrameSyncLab-${TARGET}.7z"
 else
   if [[ "$TARGET" == macos-* ]]; then
     unzip -q build/payloads/$TARGET/FrameSyncLab.zip -d build/macos-unpacked/$TARGET
-    cp -a build/macos-unpacked/$TARGET/*.app build/payloads/$TARGET/
+    apps=(build/macos-unpacked/"$TARGET"/*.app)
+    [[ ${#apps[@]} -eq 1 && -d "${apps[0]}" ]]
+    cp -a "${apps[0]}" "build/payloads/$TARGET/"
+    items=("$(basename "${apps[0]}")" "BUILD.txt")
     # Remove only the known intermediate archive from the payload.
     rm build/payloads/$TARGET/FrameSyncLab.zip
   else
     chmod +x build/payloads/$TARGET/FrameSyncLab.*
   fi
-  XZ_OPT='-9e -T2' tar -cJf "dist/FrameSyncLab-${TARGET}.tar.xz" -C build/payloads/$TARGET .
+  XZ_OPT='-9e -T2' tar -cJf "dist/FrameSyncLab-${TARGET}.tar.xz" -C "build/payloads/$TARGET" "${items[@]}"
   xz --test "dist/FrameSyncLab-${TARGET}.tar.xz"
 fi
 du -h dist/* >> "$GITHUB_STEP_SUMMARY"
