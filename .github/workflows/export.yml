@@ -1,0 +1,92 @@
+name: Build and release desktop packages
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7"
+
+jobs:
+  desktop:
+    name: Export, package and release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y 7zip xz-utils unzip
+      - name: Install matching engine and export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GODOT_VERSION}-stable"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          engine="Godot_v${version}_linux.x86_64.zip"
+          templates="Godot_v${version}_export_templates.tpz"
+          mkdir -p "$RUNNER_TEMP/godot"
+          cd "$RUNNER_TEMP/godot"
+          for asset in "$engine" "$templates" SHA512-SUMS.txt; do
+            curl --fail --location --retry 3 --output "$asset" "$base/$asset"
+          done
+          grep -F " $engine" SHA512-SUMS.txt > selected-checksums.txt
+          grep -F " $templates" SHA512-SUMS.txt >> selected-checksums.txt
+          sha512sum --check selected-checksums.txt
+          unzip -q "$engine" -d editor
+          chmod +x "editor/Godot_v${version}_linux.x86_64"
+          ln -s "$RUNNER_TEMP/godot/editor/Godot_v${version}_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+          unzip -q "$templates" -d templates-unpacked
+          destination="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$destination"
+          cp -a templates-unpacked/templates/. "$destination/"
+      - name: Import once and package targets sequentially
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --editor --import
+          while IFS='|' read -r target preset binary; do
+            if bash tools/export_package.sh "$target" "$preset" "$binary"; then
+              echo "Packaged $target" >> "$GITHUB_STEP_SUMMARY"
+            elif [[ "$target" == macos-* ]]; then
+              echo "Optional export failed: $target" >> "$GITHUB_STEP_SUMMARY"
+              rm -f "dist/FrameSyncLab-${target}.tar.xz"
+            else
+              exit 1
+            fi
+          done <<'TARGETS'
+          windows-x64|Windows x64|FrameSyncLab.exe
+          windows-arm64|Windows ARM64|FrameSyncLab.exe
+          linux-x64|Linux x64|FrameSyncLab.x86_64
+          linux-arm64|Linux ARM64|FrameSyncLab.arm64
+          macos-x64|macOS x64|FrameSyncLab.zip
+          macos-arm64|macOS ARM64|FrameSyncLab.zip
+          TARGETS
+      - name: Verify required packages and publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          for file in FrameSyncLab-windows-x64.7z FrameSyncLab-windows-arm64.7z FrameSyncLab-linux-x64.tar.xz FrameSyncLab-linux-arm64.tar.xz; do
+            test -s "dist/$file"
+          done
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          flags=()
+          if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$TAG" dist/* --repo "$GH_REPO" --verify-tag --title "$TAG" --generate-notes "${flags[@]}"
