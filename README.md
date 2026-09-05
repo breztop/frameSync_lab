@@ -1,6 +1,6 @@
 # Frame Sync Lab
 
-当前版本：**v0.1**。
+当前版本：**v0.1.1**。
 
 用于 BreFlow source → sink 同源画面可见延迟测试的离线 Godot 4.7 轻量 2D 项目。支持 Windows、Linux、macOS 的 x64 / ARM64 导出。默认 1152×648 客户区、Compatibility 渲染器、目标 60 FPS、VSync 开启、轻负载背景。继承原项目版本，不需要网络服务。
 
@@ -94,13 +94,13 @@ python tools/check_export.py "C:\实际记录目录\某轮导出目录"
 确认要发布的代码已经提交并推送后，例如：
 
 ```powershell
-git tag v0.1
-git push origin v0.1
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 这两个命令会为当前提交创建版本并触发公开发布；本文只提供操作示例，没有替你执行。标签需要指向包含工作流及所有项目文件的提交。请勿反复移动或覆盖已发布的标签，更新版本时使用新标签。
 
-构建成功后自动在 [GitHub Releases](https://github.com/breztop/frameSync_lab/releases) 创建下载页，上传平台包及 `SHA256SUMS.txt`。带连字符的标签（如 `v0.1-rc.1`）标记为预发布。仓库公开时，大家无需通过 Actions 页面便可下载 Release 附件。
+构建成功后自动在 [GitHub Releases](https://github.com/breztop/frameSync_lab/releases) 创建下载页，上传平台包及 `SHA256SUMS.txt`。带连字符的标签（如 `v0.1.1-rc.1`）标记为预发布。仓库公开时，大家无需通过 Actions 页面便可下载 Release 附件。
 
 | 平台 | 下载包 | 构建方式 |
 | --- | --- | --- |

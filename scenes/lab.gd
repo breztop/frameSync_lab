@@ -71,7 +71,7 @@ func _ready() -> void:
 	tabs.set_tab_title(1, "窗口与帧率")
 	tabs.set_tab_title(2, "测试环境记录")
 	$Interface/AboutPanel/Panel/Margin/Content/Body.meta_clicked.connect(_open_about_link)
-	$Interface/AboutPanel/Panel/Margin/Content/Identity/VersionBadge/Version.text = "v" + str(ProjectSettings.get_setting("application/config/version", "0.1"))
+	$Interface/AboutPanel/Panel/Margin/Content/Identity/VersionBadge/Version.text = "v" + str(ProjectSettings.get_setting("application/config/version", "0.1.1"))
 	get_window().size_changed.connect(_window_changed)
 	_update_setting_availability()
 	initialized = true
@@ -183,7 +183,7 @@ func _config() -> Dictionary:
 		"capture_resolution_user": controls.capture.text, "bitrate_kbps_user": controls.bitrate.value,
 		"sink_preview_user": controls.sink.text, "machine_user": controls.machine.text,
 		"notes_user": controls.notes.text, "os": OS.get_name(), "os_version": OS.get_version(),
-		"app_version": ProjectSettings.get_setting("application/config/version", "0.1"),
+		"app_version": ProjectSettings.get_setting("application/config/version", "0.1.1"),
 		"godot": Engine.get_version_info().string, "renderer": "gl_compatibility",
 		"background_resource_error": background.resource_error,
 		"settings_visible": settings_panel.visible, "about_visible": about_panel.visible,
