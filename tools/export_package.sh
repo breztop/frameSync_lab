@@ -4,6 +4,13 @@ TARGET="$1"
 PRESET="$2"
 BINARY="$3"
 ROOT="$PWD"
+if [[ "$TARGET" == windows-* ]]; then
+  SEVEN_ZIP="${SEVEN_ZIP:-$(command -v 7zz || command -v 7z || true)}"
+  if [[ -z "$SEVEN_ZIP" ]] || ! command -v "$SEVEN_ZIP" >/dev/null 2>&1; then
+    echo "7-Zip not found; install 7zip (7z or 7zz) before exporting." >&2
+    exit 1
+  fi
+fi
 mkdir -p "build/payloads/$TARGET"
 godot --headless --path . --export-release "$PRESET" "build/payloads/$TARGET/$BINARY"
 test -s "build/payloads/$TARGET/$BINARY"
@@ -13,8 +20,8 @@ git archive HEAD | tar -x -C build/payloads/$TARGET/source
 printf 'Source commit: %s\nGodot: %s-stable\n' "$GITHUB_SHA" "$GODOT_VERSION" > build/payloads/$TARGET/BUILD.txt
 mkdir -p dist
 if [[ "$TARGET" == windows-* ]]; then
-  (cd build/payloads/$TARGET && 7zz a -t7z -m0=lzma2 -mx=9 -md=64m -ms=on "$ROOT/dist/FrameSyncLab-${TARGET}.7z" .)
-  7zz t "dist/FrameSyncLab-${TARGET}.7z"
+  (cd build/payloads/$TARGET && "$SEVEN_ZIP" a -t7z -m0=lzma2 -mx=9 -md=64m -ms=on "$ROOT/dist/FrameSyncLab-${TARGET}.7z" .)
+  "$SEVEN_ZIP" t "dist/FrameSyncLab-${TARGET}.7z"
 else
   if [[ "$TARGET" == macos-* ]]; then
     unzip -q build/payloads/$TARGET/FrameSyncLab.zip -d build/macos-unpacked/$TARGET

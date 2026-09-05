@@ -27,8 +27,16 @@ jobs:
           persist-credentials: false
       - name: Install packaging tools
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y 7zip xz-utils unzip
+          seven_zip="$(command -v 7zz || command -v 7z || true)"
+          if [ -z "$seven_zip" ]; then
+            echo "::error::7-Zip installed but neither 7zz nor 7z is on PATH"
+            exit 1
+          fi
+          "$seven_zip" i
+          echo "SEVEN_ZIP=$seven_zip" >> "$GITHUB_ENV"
       - name: Install matching engine and export templates
         shell: bash
         run: |
